@@ -1,0 +1,162 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Environment Variables (IMPORTANT: Keep API keys private!)
+.env
+.env.local
+.env.*.local
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# ChromaDB / Vector Store Database
+chroma_db/
+*.db
+*.sqlite3
+*.sqlite
+
+# Streamlit
+.streamlit/secrets.toml
+.streamlit/config.toml
+
+# Logs and temporary files
+*.log
+LLM_Response.txt
+logs/
+*.tmp
+*.temp
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+.pytest/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# Project specific
+notes.txt
+scratch/
+temp/
+TODO.md
+personal_notes/
+
+# Package files
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Cache directories
+.cache/
+*.cache
+__pycache__/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Profiling
+*.prof
+*.lprof
+
+# Documentation builds
+docs/_build/
+site/
+_build/
+.doctrees/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Database files (if any)
+*.db-journal
+*.db-wal
+*.db-shm
+
+# API Response Logs
+LLM_Response.txt
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+
+# C extensions
+*.so
+*.dylib
+*.dll
+
+# Cython
+cython_debug/
