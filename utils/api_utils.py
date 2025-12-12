@@ -199,7 +199,7 @@ async def _fetch_unsplash_fallback(city: str, count: int = 5) -> List[str]:
     return images
 
 
-def mock_web_search(query: str) -> str:
+def execute_web_search(query: str) -> str:
     """
     Web search function using SerpAPI Google Search.
     Falls back to mock data if SerpAPI fails or API key not available.

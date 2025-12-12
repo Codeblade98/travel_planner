@@ -4,7 +4,7 @@ Run this to test both with and without API key.
 """
 import asyncio
 import os
-from mock_apis import fetch_city_images, mock_web_search
+from utils.api_utils import fetch_city_images, mock_web_search
 from dotenv import load_dotenv
 
 load_dotenv()

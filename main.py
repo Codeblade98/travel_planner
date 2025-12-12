@@ -1,7 +1,3 @@
-"""
-CLI interface for Multi-Modal Travel Assistant.
-Updated for new 4-node architecture with interactive streaming.
-"""
 import asyncio
 import json
 from agent import run_agent_interactive, clear_session, SESSION_MEMORY

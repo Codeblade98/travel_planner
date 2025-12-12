@@ -1,7 +1,3 @@
-"""
-Vector store initialization and management with ChromaDB.
-Pre-populates the database with detailed city information.
-"""
 import chromadb
 from chromadb.config import Settings
 from typing import List, Dict

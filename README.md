@@ -58,13 +58,6 @@ pip install -e .
 
 ### 2. Configuration
 
-```bash
-# Copy environment template
-cp .env.example .env
-
-# Edit .env and add your API keys
-```
-
 **Required:**
 - `GROQ_API_KEY` - Get from [console.groq.com/keys](https://console.groq.com/keys)
 
@@ -83,7 +76,7 @@ streamlit run streamlit_app.py
 ./run_streamlit.sh
 ```
 
-The app will open in your browser at `http://localhost:8501`
+The app will open in your browser at a port on localhost
 
 ---
 
@@ -118,7 +111,6 @@ Once the app loads, you'll see a chat interface. Try these queries:
 **Images** 📸
 - Appear at the top of responses (when relevant)
 - Compact 3-column layout
-- Weather-only queries won't show images
 
 **Weather Cards** 🌤️
 - First 3 days shown in cards
@@ -129,52 +121,6 @@ Once the app loads, you'll see a chat interface. Try these queries:
 - View current conversation memory
 - Clear chat history
 - Start fresh conversations
-
----
-
-## 🎯 Example Conversations
-
-### Example 1: Basic City Query
-```
-You: Tell me about Paris
-Assistant: 
-  📸 [4 images of Paris]
-  📍 Paris
-  Source: Vector Store
-  
-  Paris is the capital of France, known for the Eiffel Tower,
-  Louvre Museum, and rich cultural heritage...
-  
-  🌤️ Weather Forecast
-  [7-day forecast cards]
-```
-
-### Example 2: Weather-Only Query
-```
-You: What's the weather in Tokyo?
-Assistant:
-  📍 Tokyo
-  Source: Vector Store
-  
-  Tokyo currently has pleasant weather conditions...
-  
-  🌤️ Weather Forecast
-  [7-day forecast cards]
-  
-  (No images shown - weather query)
-```
-
-### Example 3: Contextual Follow-up
-```
-You: Tell me about Paris
-Assistant: [Shows Paris info, images, weather]
-
-You: What about the weather next week?
-Assistant: [Shows extended forecast for Paris - remembers context]
-
-You: Is it better than Tokyo?
-Assistant: [Compares weather - remembers both cities]
-```
 
 ---
 
@@ -198,35 +144,6 @@ Assistant: [Compares weather - remembers both cities]
 
 ---
 
-## � What You Get
-
-### City Information
-- Detailed descriptions
-- Cultural highlights
-- Historical context
-- Travel tips
-
-### Weather Data
-- 7-day forecasts
-- Temperature (°C)
-- Weather conditions
-- Humidity levels
-- Wind speed
-
-### Visual Content
-- Real Google Images (with SerpAPI)
-- Or beautiful Unsplash photos (fallback)
-- Top 4 most relevant images
-- Compact display format
-
-### Smart Features
-- Context memory
-- Multi-turn conversations
-- Clarification questions
-- Source attribution
-
----
-
 ## 🔧 Configuration Options
 
 ### Environment Variables
@@ -234,134 +151,10 @@ Assistant: [Compares weather - remembers both cities]
 ```bash
 # .env file
 GROQ_API_KEY=your_groq_api_key_here
-SERPAPI_API_KEY=your_serpapi_key_here  # Optional
+SERPAPI_API_KEY=your_serpapi_key_here 
 ```
 
-### Using Without SerpAPI
-
-The app works perfectly without a SerpAPI key:
-- ✅ Still shows images (Unsplash placeholders)
-- ✅ Still provides city information (pre-loaded or basic web)
-- ✅ All core features work
-- ❌ Images are generic/placeholder based
-- ❌ Web search is basic/mock data
-
-### Using With SerpAPI
-
-With a SerpAPI key, you get enhanced results:
-- ✅ Real Google Images of cities
-- ✅ Rich web search results
-- ✅ Current information
-- ✅ Better image quality and relevance
-
-Get your free key at [serpapi.com](https://serpapi.com/) (100 searches/month free)
-
----
-
-## � Troubleshooting
-
-### "API Key Error"
-```bash
-# Make sure .env file exists and has your key
-cat .env | grep GROQ_API_KEY
-
-# Key should look like: gsk_...
-```
-
-### "No images showing"
-- Check if query is weather-related (weather queries don't show images)
-- Try: "Tell me about Paris" (will show images)
-- Not: "What's the weather in Paris?" (won't show images)
-
-### "SerpAPI not working"
-```bash
-# Test SerpAPI integration
-python test_serpapi.py
-
-# App will automatically fall back to placeholders if SerpAPI fails
-```
-
-### "App won't start"
-```bash
-# Reinstall dependencies
-pip install -e .
-
-# Or recreate virtual environment
-rm -rf venv/
-python3 -m venv venv
-source venv/bin/activate
-pip install -e .
-```
-
----
-
-## 📱 Tips for Best Experience
-
-### ✅ Do:
-- Ask about specific cities
-- Follow up with contextual questions
-- Try different types of queries (weather, culture, travel tips)
-- Use the session memory viewer to see what the AI remembers
-
-### ❌ Avoid:
-- Very vague queries ("Tell me something") - be specific
-- Multiple cities in one query - ask separately for better results
-- Expect real-time data - weather is simulated, info may not be current
-
----
-
-## 🎓 Learning Resources
-
-Want to understand how it works? Check these docs:
-
-- **`ARCHITECTURE.md`** - System design and node structure
-- **`SERPAPI_INTEGRATION.md`** - How real search works
-- **`STREAMLIT_README.md`** - Chat interface details
-- **`IMAGE_SIZE_UPDATE.md`** - Image display logic
-
----
-
-## 🌟 Highlights
-
-✨ **Natural Language Processing** - Understands casual conversation  
-🧠 **Context Memory** - Remembers your conversation  
-🔍 **Multi-Source** - Vector store + web search  
-⚡ **Fast** - Parallel data fetching  
-🎨 **Beautiful UI** - Clean Streamlit interface  
-📸 **Visual** - Real images from Google  
-🌤️ **Weather** - 7-day forecasts  
-💬 **Smart** - Asks clarifying questions when needed  
-
----
-
-## 📞 Support
-
-Having issues? 
-
-1. Check the **Troubleshooting** section above
-2. Review the `.env.example` file for proper configuration
-3. Run `python test_serpapi.py` to test API connectivity
-4. Check console output for debug messages
-
----
-
-**Ready to explore the world? Start the app and ask away! 🚀**
-
-```bash
-streamlit run streamlit_app.py
-```
-        
-        # Manual execution
-        if tool_name == "fetch_weather":
-            result = await fetch_weather_forecast(**tool_args)
-        
-        tool_msg = ToolMessage(
-            content=json.dumps(result),
-            tool_call_id=tool_call["id"]
-        )
-```
-
-### 3. Parallel Execution
+### Parallel Execution
 ```python
 async def parallel_fetch_node(state: AgentState):
     weather_task = fetch_weather_forecast(city)
@@ -371,7 +164,7 @@ async def parallel_fetch_node(state: AgentState):
     weather, images = await asyncio.gather(weather_task, images_task)
 ```
 
-### 4. Memory Persistence
+### Memory Persistence
 ```python
 memory = MemorySaver()
 app = workflow.compile(checkpointer=memory)
@@ -385,7 +178,6 @@ result = await app.ainvoke(initial_state, config)
 ## 🎨 UI Features
 
 ### Weather Visualization
-- **Interactive Plotly Chart**: Line graph showing 7-day temperature trends
 - **Current Metrics**: Temperature, condition, humidity, wind speed
 - **Detailed Table**: Expandable forecast with all data points
 

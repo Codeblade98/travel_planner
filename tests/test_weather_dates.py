@@ -4,7 +4,7 @@ Test script to verify weather forecast date range (Dec 2025 - June 2026)
 """
 import asyncio
 from datetime import datetime
-from mock_apis import fetch_weather_forecast
+from utils.api_utils import fetch_weather_forecast
 
 async def test_weather_dates():
     print("🌤️  Testing Weather Forecast Date Range")

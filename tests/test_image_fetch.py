@@ -2,7 +2,7 @@
 Quick test script to verify image URLs are being generated correctly.
 """
 import asyncio
-from mock_apis import fetch_city_images
+from utils.api_utils import fetch_city_images
 
 async def test_images():
     print("Testing image fetch...")

@@ -1,7 +1,3 @@
-"""
-Streamlit Chat Interface for Multi-Modal Travel Assistant.
-Based on the interactive agent logic from main.py.
-"""
 import asyncio
 import streamlit as st
 from agent import run_agent_interactive, clear_session, SESSION_MEMORY, build_graph
