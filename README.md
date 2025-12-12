@@ -28,68 +28,111 @@ This system implements a **state-driven, graph-based conversational agent** that
 ```mermaid
 graph TB
     %% User Interfaces
-    CLI[CLI Interface]
-    WEB[Streamlit Web App]
+    CLI[CLI Interface<br/>main.py]
+    WEB[Streamlit Web App<br/>streamlit_app.py]
     
     %% Core Agent System
-    subgraph "LangGraph Stateful Workflow"
+    subgraph "LangGraph Agent Workflow"
         START([START])
-        ROUTER[Router Node<br/>City Extraction & Routing]
-        QUERY[Query Node<br/>Data Aggregation]
-        USER[User Node<br/>Response Generation]
+        ROUTER[Router Node<br/>- LLM City Extraction<br/>- Session Analysis<br/>- Routing Logic]
+        QUERY[Query Node<br/>- Vector/Web Search<br/>- Parallel Tool Execution<br/>- Data Aggregation]
+        USER[User Node<br/>- Response Generation<br/>- Formatting Output]
         END([END])
     end
     
-    %% State Management
-    subgraph "State & Memory Layer"
-        STATE[AgentState<br/>Messages, Session Data, Images, Weather]
-        SESSION[Session Memory<br/>User Preferences, Context Cache]
-        CHECKPOINT[MemorySaver<br/>Thread-based Persistence]
+    %% Memory and State
+    subgraph "State Management"
+        STATE[AgentState<br/>- messages<br/>- thread_id<br/>- session_data<br/>- image_urls<br/>- weather_data]
+        SESSION[Session Memory<br/>- User preferences<br/>- City cache<br/>- Travel info]
+        MEMORY[MemorySaver<br/>Checkpoint Storage]
     end
     
-    %% LLM Services
-    subgraph "LLM Intelligence Layer"
-        LLM[ChatGroq<br/>3 Fallback Models]
-        RETRY[Rate Limit Handler<br/>Auto Model Switching]
-        SUMMARIZE[Token Management<br/>Auto-Summarization at 8K]
+    %% LLM Layer
+    subgraph "LLM Services"
+        LLM[ChatGroq LLM<br/>- llama-3.3-70b<br/>- mixtral-8x7b<br/>- gemma2-9b]
+        RETRY[Retry Logic<br/>- Rate limit handling<br/>- Model fallback<br/>- Token management]
+        SUMMARIZE[Message Summarization<br/>Auto-trigger at 8k tokens]
     end
     
     %% Data Sources
-    subgraph "Knowledge Layer"
-        VECTOR[(ChromaDB<br/>Pre-loaded Cities)]
-        WEB_SEARCH[SerpAPI Web Search<br/>Fallback Source]
+    subgraph "Knowledge Sources"
+        VECTOR[(ChromaDB Vector Store<br/>- Paris<br/>- Tokyo<br/>- New York<br/>Similarity > 0.9)]
+        WEB_SEARCH[SerpAPI Web Search<br/>Fallback for unknown cities]
     end
     
     %% External APIs
-    subgraph "External Data Sources"
-        WEATHER[Weather API<br/>Mock Forecast]
-        IMAGES[Image Search<br/>SerpAPI/Fallback]
-        SEARCH[Web Search<br/>SerpAPI/Fallback]
+    subgraph "External Services"
+        WEATHER[Mock Weather API<br/>7-day forecast<br/>Dec 2025 - Jun 2026]
+        IMAGES[SerpAPI Images<br/>Google Image Search<br/>Top 4 images]
+        SEARCH[SerpAPI Search<br/>Web results]
     end
     
-    %% Flows
+    %% Logging System
+    subgraph "Logging & Monitoring"
+        LOGGER[Logger System<br/>- app.log<br/>- errors.log<br/>- llm_responses.log]
+    end
+    
+    %% User Flow
     CLI --> START
     WEB --> START
+    
+    %% Graph Flow
     START --> ROUTER
-    ROUTER -->|City Found| QUERY
-    ROUTER -->|Needs Clarification| USER
+    ROUTER -->|City Found<br/>No Clarification| QUERY
+    ROUTER -->|Needs Clarification<br/>No City| USER
     QUERY --> ROUTER
     USER --> END
     
+    %% State Interactions
     ROUTER <--> STATE
     QUERY <--> STATE
     USER <--> STATE
     STATE <--> SESSION
-    STATE <--> CHECKPOINT
+    STATE <--> MEMORY
     
+    %% LLM Interactions
     ROUTER --> LLM
     QUERY --> LLM
     USER --> LLM
+    LLM --> RETRY
+    RETRY --> SUMMARIZE
     
+    %% Data Source Queries
     QUERY --> VECTOR
-    QUERY --> WEB_SEARCH
+    QUERY -->|Similarity < 0.9| WEB_SEARCH
+    VECTOR -.->|Cache Hit| SESSION
+    
+    %% Parallel API Calls
     QUERY ==>|Parallel| WEATHER
     QUERY ==>|Parallel| IMAGES
+    QUERY ==>|Parallel| SEARCH
+    
+    %% Logging
+    ROUTER -.-> LOGGER
+    QUERY -.-> LOGGER
+    USER -.-> LOGGER
+    LLM -.-> LOGGER
+    WEATHER -.-> LOGGER
+    IMAGES -.-> LOGGER
+    
+    %% Response Flow
+    END --> CLI
+    END --> WEB
+    
+    %% Styling
+    classDef interface fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    classDef agent fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    classDef llm fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    classDef data fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px
+    classDef api fill:#fce4ec,stroke:#880e4f,stroke-width:3px
+    classDef state fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    
+    class CLI,WEB interface
+    class ROUTER,QUERY,USER agent
+    class LLM,RETRY,SUMMARIZE llm
+    class VECTOR,WEB_SEARCH data
+    class WEATHER,IMAGES,SEARCH api
+    class STATE,SESSION,MEMORY state
 ```
 
 ---
