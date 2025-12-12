@@ -1,420 +1,423 @@
-# 🌍 Multi-Modal Travel Assistant
+# 🌍 Multi-Modal Travel Assistant - Architecture Overview
 
-An intelligent AI-powered travel assistant that helps you explore cities, check weather forecasts, and plan your trips through natural conversation.
+An intelligent AI-powered travel assistant built with **LangGraph**, featuring a stateful multi-node graph architecture for orchestrating conversational AI, vector search, and parallel API execution.
 
-![Architecture](https://img.shields.io/badge/LangGraph-4--Node_Graph-blue)
-![LLM](https://img.shields.io/badge/Groq-Llama_3.3-green)
-![UI](https://img.shields.io/badge/Streamlit-Chat_Interface-red)
-![Vector Store](https://img.shields.io/badge/ChromaDB-Vector_Store-orange)
-![Search](https://img.shields.io/badge/SerpAPI-Real_Search-purple)
-
----
-
-## ✨ What Can It Do?
-
-### 🗨️ Natural Conversations
-Talk to the assistant naturally - it understands context and remembers your conversation:
-- **"Tell me about Paris"** → Get city information, weather, and images
-- **"What's the weather like?"** → Get 7-day weather forecast
-- **"What about next week?"** → It remembers you were asking about Paris
-
-### 📸 Visual Information
-- See beautiful images of cities (real Google Images via SerpAPI)
-- Compact 3-column image grid for better viewing
-- Weather-focused queries show data only (no unnecessary images)
-
-### 🌤️ Weather Forecasts
-- 7-day weather forecasts for any city
-- Temperature, humidity, wind speed, and conditions
-- Beautiful weather cards in the chat interface
-
-### 🧠 Smart Context Understanding
-- Remembers your preferences and previous questions
-- Asks for clarification when needed
-- Maintains conversation context across multiple messages
-
-### 🔍 Multi-Source Information
-- Pre-loaded knowledge about major cities (Paris, Tokyo, New York)
-- Real-time web search for other cities
-- Automatic fallback between sources
+![Architecture](https://img.shields.io/badge/LangGraph-Stateful_Graph-blue)
+![LLM](https://img.shields.io/badge/Groq-Llama_3.3_70B-green)
+![UI](https://img.shields.io/badge/Streamlit-Real--time_Chat-red)
+![Vector Store](https://img.shields.io/badge/ChromaDB-Vector_DB-orange)
+![Search](https://img.shields.io/badge/SerpAPI-Live_Search-purple)
 
 ---
 
-## 🚀 Quick Start
+## 🏗️ System Architecture
 
-### 1. Installation
+### Architecture Philosophy
 
-```bash
-# Clone or navigate to the project
-cd digialpha_task
-
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -e .
-```
-
-### 2. Configuration
-
-**Required:**
-- `GROQ_API_KEY` - Get from [console.groq.com/keys](https://console.groq.com/keys)
-
-**Optional (for better results):**
-- `SERPAPI_API_KEY` - Get from [serpapi.com](https://serpapi.com/) (100 free searches/month)
-  - Without it: Uses Unsplash placeholder images and basic web info
-  - With it: Real Google Images and rich search results
-
-### 3. Run the App
-
-```bash
-# Start the Streamlit chat interface
-streamlit run streamlit_app.py
-
-# Or use the helper script
-./run_streamlit.sh
-```
-
-The app will open in your browser at a port on localhost
+This system implements a **state-driven, graph-based conversational agent** that:
+- **Decouples concerns** through distinct nodes (routing, data fetching, user interaction)
+- **Maintains stateful memory** across conversation turns using LangGraph's checkpointing
+- **Optimizes performance** via parallel API execution
+- **Ensures reliability** through multi-source data retrieval with automatic fallbacks
+- **Scales gracefully** using token-aware message summarization
 
 ---
 
-## 💬 How to Use
+## 📊 High-Level Architecture Diagram
 
-### Starting a Conversation
-
-Once the app loads, you'll see a chat interface. Try these queries:
-
-**City Information:**
-- "Tell me about Paris"
-- "What should I see in Tokyo?"
-- "Describe New York for me"
-
-**Weather Queries:**
-- "What's the weather in Paris?"
-- "How cold is it in Tokyo?"
-- "Give me the forecast for London"
-
-**Follow-up Questions:**
-- First: "Tell me about Paris"
-- Then: "What's the weather like?" *(remembers Paris)*
-- Then: "What about next week?" *(still remembers Paris)*
-
-**Multi-city Exploration:**
-- "Compare Paris and Tokyo"
-- "I want to visit Tokyo"
-- "What about the weather there?"
-
-### Features in the Chat Interface
-
-**Images** 📸
-- Appear at the top of responses (when relevant)
-- Compact 3-column layout
-
-**Weather Cards** 🌤️
-- First 3 days shown in cards
-- More days available in expandable section
-- Shows temperature, humidity, and conditions
-
-**Session Management** 💾
-- View current conversation memory
-- Clear chat history
-- Start fresh conversations
-
----
-
-## 🎨 Interface Features
-
-### Main Chat
-- **Clean message bubbles** for user and assistant
-- **Inline images** (compact 250px width, 3-column grid)
-- **Weather cards** with icons and metrics
-- **Smooth scrolling** conversation history
-
-### Sidebar
-- **Session info** - View what the AI remembers
-- **Clear history** - Start a fresh conversation
-- **About section** - Tech stack information
-
-### Smart Display
-- Weather queries: Text only
-- City queries: Images + text + weather
-- Explicit requests: Always shows what you ask for
-
----
-
-## 🔧 Configuration Options
-
-### Environment Variables
-
-```bash
-# .env file
-GROQ_API_KEY=your_groq_api_key_here
-SERPAPI_API_KEY=your_serpapi_key_here 
-```
-
-### Parallel Execution
-```python
-async def parallel_fetch_node(state: AgentState):
-    weather_task = fetch_weather_forecast(city)
-    images_task = fetch_city_images(city)
+```mermaid
+graph TB
+    %% User Interfaces
+    CLI[CLI Interface]
+    WEB[Streamlit Web App]
     
-    # Concurrent execution
-    weather, images = await asyncio.gather(weather_task, images_task)
+    %% Core Agent System
+    subgraph "LangGraph Stateful Workflow"
+        START([START])
+        ROUTER[Router Node<br/>City Extraction & Routing]
+        QUERY[Query Node<br/>Data Aggregation]
+        USER[User Node<br/>Response Generation]
+        END([END])
+    end
+    
+    %% State Management
+    subgraph "State & Memory Layer"
+        STATE[AgentState<br/>Messages, Session Data, Images, Weather]
+        SESSION[Session Memory<br/>User Preferences, Context Cache]
+        CHECKPOINT[MemorySaver<br/>Thread-based Persistence]
+    end
+    
+    %% LLM Services
+    subgraph "LLM Intelligence Layer"
+        LLM[ChatGroq<br/>3 Fallback Models]
+        RETRY[Rate Limit Handler<br/>Auto Model Switching]
+        SUMMARIZE[Token Management<br/>Auto-Summarization at 8K]
+    end
+    
+    %% Data Sources
+    subgraph "Knowledge Layer"
+        VECTOR[(ChromaDB<br/>Pre-loaded Cities)]
+        WEB_SEARCH[SerpAPI Web Search<br/>Fallback Source]
+    end
+    
+    %% External APIs
+    subgraph "External Data Sources"
+        WEATHER[Weather API<br/>Mock Forecast]
+        IMAGES[Image Search<br/>SerpAPI/Fallback]
+        SEARCH[Web Search<br/>SerpAPI/Fallback]
+    end
+    
+    %% Flows
+    CLI --> START
+    WEB --> START
+    START --> ROUTER
+    ROUTER -->|City Found| QUERY
+    ROUTER -->|Needs Clarification| USER
+    QUERY --> ROUTER
+    USER --> END
+    
+    ROUTER <--> STATE
+    QUERY <--> STATE
+    USER <--> STATE
+    STATE <--> SESSION
+    STATE <--> CHECKPOINT
+    
+    ROUTER --> LLM
+    QUERY --> LLM
+    USER --> LLM
+    
+    QUERY --> VECTOR
+    QUERY --> WEB_SEARCH
+    QUERY ==>|Parallel| WEATHER
+    QUERY ==>|Parallel| IMAGES
 ```
 
-### Memory Persistence
-```python
-memory = MemorySaver()
-app = workflow.compile(checkpointer=memory)
+---
 
-config = {"configurable": {"thread_id": "user_session_123"}}
-result = await app.ainvoke(initial_state, config)
+## 🔄 Graph Flow Architecture
+
+### Node Structure
+
+The system uses a **4-node LangGraph** with conditional routing:
+
+#### 1️⃣ **Router Node** (Decision Point)
+**Responsibility**: Intelligent query analysis and traffic routing
+
+**Process**:
+1. Receives user input via `AgentState.messages`
+2. Invokes LLM to extract:
+   - City name (if present)
+   - User preferences (trip type, travel preferences, name)
+   - Need for clarification
+3. Updates `SessionMemory` with extracted preferences
+4. Routes to:
+   - **Query Node** if city is clear and sufficient context exists
+   - **User Node** if clarification needed or no city found
+
+**Key Features**:
+- LLM-driven session management (dynamic key-value updates)
+- Token-aware message chain (triggers summarization at 8K tokens)
+- Contextual clarification questions
+
+**State Updates**:
+```python
+{
+    "next_node": "query" | "user",
+    "clarification_question": JSON serialized query data,
+    "session_data": {user_name, city_name, trip_type, preferences}
+}
 ```
 
 ---
 
-## 🎨 UI Features
+#### 2️⃣ **Query Node** (Data Orchestration)
+**Responsibility**: Multi-source data retrieval with intelligent fallbacks
 
-### Weather Visualization
-- **Current Metrics**: Temperature, condition, humidity, wind speed
-- **Detailed Table**: Expandable forecast with all data points
+**Process**:
+1. **Parse Query**: Extract city and search query from router output
+2. **Session Cache Check**: Look for cached city summary in session
+3. **Vector Search** (ChromaDB):
+   - Query with semantic similarity
+   - Accept only high-confidence matches (similarity > 0.9)
+   - Cache results in session for future queries
+4. **Web Search Fallback** (SerpAPI):
+   - Triggered when vector similarity < 0.9
+   - Fetches real-time information
+   - Caches in session
+5. **Parallel API Execution**:
+   ```python
+   weather, images, web_results = await asyncio.gather(
+       fetch_weather_forecast(city),
+       fetch_city_images(city),
+       execute_web_search(query)
+   )
+   ```
 
-### Image Gallery
-- **Responsive Grid**: 3-column layout
-- **High-Quality Images**: Fetched from Unsplash (mock URLs)
-- **Error Handling**: Graceful fallback for failed loads
+**Data Flow**:
+```
+Query Node
+├── Session Cache Hit? → Use cached data
+├── Vector Search (similarity > 0.9) → Cache & use
+├── Web Search (fallback) → Cache & use
+└── Parallel Fetch:
+    ├── Weather API
+    ├── Image Search
+    └── Web Search
+```
 
-### Conversation Management
-- **Thread-Based Memory**: Each session has a unique ID
-- **Chat History**: Full conversation display
-- **Reset Option**: Clear history and start fresh
-
----
-
-## 🔧 Configuration
-
-### Environment Variables
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GROQ_API_KEY` | Your Groq API key ([Get it here](https://console.groq.com/keys)) | Yes |
-| `SERPAPI_API_KEY` | Your SerpAPI key for real image/web search ([Get it here](https://serpapi.com/)) | No |
-
-**Note**: Without `SERPAPI_API_KEY`, the app uses fallback mode (Unsplash images + mock data).
-
-### API Implementations
-
-#### Weather API (Mock)
-Simulates realistic weather forecasts for any city.
-
-#### Image Search (SerpAPI + Fallback)
-- **With SerpAPI**: Real Google Images results
-- **Without SerpAPI**: Unsplash placeholder URLs
-- **Automatically falls back** if API key missing or error occurs
-
-#### Web Search (SerpAPI + Fallback)
-- **With SerpAPI**: Real Google search results (answer boxes, knowledge graphs, snippets)
-- **Without SerpAPI**: Pre-defined city information
-- **Automatically falls back** if API key missing or error occurs
-
-See [`SERPAPI_INTEGRATION.md`](./SERPAPI_INTEGRATION.md) for detailed documentation.
-
----
-
-## 🧩 Extending the System
-
-### Add More Cities to Vector Store
-Edit `vector_store.py`:
+**State Updates**:
 ```python
-cities_data = [
-    {
-        "id": "london",
-        "city": "London",
-        "content": "Detailed information about London...",
-        "metadata": {"country": "UK", ...}
-    }
+{
+    "image_urls": List[str],  # Replaced each query
+    "weather_data": List[Dict],  # Replaced each query
+    "last_extracted_data": JSON city summary,
+    "next_node": "router"  # Loop back for response
+}
+```
+
+---
+
+#### 3️⃣ **User Node** (Response Synthesis)
+**Responsibility**: Natural language response generation
+
+**Process**:
+1. Receives full context from `AgentState`
+2. Constructs prompt with:
+   - Conversation history
+   - Session memory (user preferences)
+   - Fetched data (city info, weather, images)
+3. Invokes LLM for natural response generation
+4. Returns formatted response to user
+
+**State Updates**:
+```python
+{
+    "messages": messages + [AIMessage(content=response)],
+    "next_node": "__end__"
+}
+```
+
+---
+
+### Conditional Routing Logic
+
+```python
+def route_from_router(state: AgentState) -> str:
+    """
+    Routing Decision:
+    - "query": City extracted, context sufficient
+    - "user": Needs clarification or no city found
+    """
+    return state.get("next_node", "user")
+```
+
+**Routing Table**:
+| Condition | Route | Reason |
+|-----------|-------|--------|
+| City found + context sufficient | `router → query` | Fetch data |
+| City found + needs clarification | `router → user` | Ask follow-up |
+| No city found | `router → user` | Request city |
+| Data fetched | `query → router` | Process response |
+| Response ready | `user → END` | Return to user |
+
+---
+
+## 💾 State Management Architecture
+
+### AgentState Schema
+
+```python
+class AgentState(TypedDict):
+    messages: List[BaseMessage]           # Full conversation history
+    thread_id: Optional[str]              # Session identifier
+    session_data: Optional[Dict]          # LLM-managed preferences
+    prev_node: Optional[str]              # Last executed node
+    next_node: Optional[str]              # Routing destination
+    clarification_question: Optional[str] # Pending user query
+    last_extracted_data: Optional[str]    # Cached city info
+    image_urls: Optional[List[str]]       # Current query images
+    weather_data: Optional[List[Dict]]    # Current query weather
+```
+
+### Session Memory Layer
+
+**Two-tier memory system**:
+
+1. **LangGraph Checkpointer** (MemorySaver):
+   - Persists entire `AgentState` per thread
+   - Enables conversation continuity
+   - Thread-scoped isolation
+
+2. **Custom Session Memory**:
+   - Stores user preferences extracted by LLM
+   - Caches city summaries for performance
+   - Managed by `SessionMemory` class
+   - In-memory (can be swapped for Redis/DB)
+
+**Memory Update Flow**:
+```
+User Query → Router Node
+    ↓
+LLM Extraction → {user_name, city_name, trip_type, preferences}
+    ↓
+SESSION_MEMORY.update_session(thread_id, extracted_data)
+    ↓
+Available to all subsequent nodes
+```
+
+### Token Management
+
+**Problem**: Long conversations → Token overflow → API errors
+
+**Solution**: Automatic message summarization
+
+```python
+def check_and_summarize_messages(messages, llm, max_tokens=8000):
+    """
+    - Counts tokens in message chain
+    - If > max_tokens: Summarize older messages
+    - Keep recent 4 messages + summary
+    """
+    if count_tokens > max_tokens:
+        summary = llm.invoke("Summarize conversation: ...")
+        return [SystemMessage(summary)] + messages[-4:]
+    return messages
+```
+
+**Triggers**:
+- Router Node: Before processing each user input
+- Interactive Loop: Preventive check at 6K tokens
+
+---
+
+## 🔌 Data Sources & APIs
+
+### 1. Vector Store (ChromaDB)
+
+**Architecture**:
+```
+ChromaDB Persistent Client
+├── Collection: "city_knowledge"
+├── Pre-loaded: Paris, Tokyo, New York
+├── Embedding: Default ChromaDB embeddings
+└── Similarity Threshold: 0.9 for high confidence
+```
+
+**Query Strategy**:
+1. Semantic search with user query
+2. Calculate similarity: `1 - distance`
+3. Accept if similarity > 0.9
+4. Otherwise, fallback to web search
+
+**Advantages**:
+- Fast retrieval (< 100ms)
+- Offline capability for known cities
+- Semantic understanding (e.g., "City of Light" → Paris)
+
+---
+
+### 2. Web Search (SerpAPI + Fallback)
+
+**Primary**: SerpAPI Google Search
+- Real-time web results
+- Answer boxes, knowledge graphs
+- Structured snippets
+
+**Fallback**: Basic text return
+- Triggers when API key missing or quota exceeded
+- Returns generic message
+
+**Integration**:
+```python
+def execute_web_search(query: str) -> str:
+    if SERPAPI_KEY:
+        results = GoogleSearch({
+            "q": query,
+            "api_key": SERPAPI_KEY
+        }).get_dict()
+        return parse_answer_box(results)
+    else:
+        return f"Search query: {query} (fallback mode)"
+```
+
+---
+
+### 3. Image Search (SerpAPI + Fallback)
+
+**Primary**: SerpAPI Google Images
+- Real Google Images results
+- Top 4 images per query
+- High-quality URLs
+
+**Fallback**: Unsplash placeholders
+- Generates placeholder URLs
+- Always returns 4 images
+
+**Architecture Decision**: Graceful degradation ensures UI never breaks
+
+---
+
+### 4. Weather API (Mock Implementation)
+
+**Design**: Realistic mock for demonstration
+
+**Features**:
+- 7-day forecast
+- Date range: Dec 2025 - Jun 2026
+- City-specific temperature profiles
+- Seasonal weather patterns
+- Async simulation with latency (0.5-1.5s)
+
+**Production Ready**: Easy swap for OpenWeatherMap, WeatherAPI, etc.
+
+---
+
+## 🧠 LLM Intelligence Layer
+
+### Model Strategy
+
+**Multi-Model Fallback Chain**:
+```python
+AVAILABLE_MODELS = [
+    "llama-3.3-70b-versatile",  # Primary: Best quality
+    "mixtral-8x7b-32768",       # Fallback 1: Good balance
+    "gemma2-9b-it"              # Fallback 2: Lightweight
 ]
 ```
 
-### Add New Tools
-Edit `agent.py`:
+**Auto-Switching Logic**:
+1. Start with Llama 3.3 (70B params)
+2. On rate limit error → Switch to Mixtral
+3. On second rate limit → Switch to Gemma2
+4. Exponential backoff between retries
+
+### Rate Limit Handling
+
+**Detection**:
 ```python
-TOOLS.append({
-    "type": "function",
-    "function": {
-        "name": "book_hotel",
-        "description": "Book a hotel in the city",
-        "parameters": {...}
-    }
-})
+def parse_rate_limit_error(error_message):
+    # Detects TPM (tokens/minute) or TPD (tokens/day)
+    # Extracts retry_after time
+    # Returns limit type and wait duration
 ```
 
-### Customize UI
-Edit `streamlit_app.py`:
-- Modify CSS in the `st.markdown()` section
-- Add new visualizations (maps, reviews, etc.)
-- Change layout and color schemes
+**Response Strategy**:
+- **TPM**: Wait 80 seconds, retry same model
+- **TPD**: Switch to next model immediately
+- **Max retries**: 3 attempts before failing gracefully
 
----
+### Retry Mechanism
 
-## 🧪 Testing
-
-### Test SerpAPI Integration
-```bash
-# Test with/without API key
-python test_serpapi.py
-```
-
-Expected output:
-- ✓ With API key: Real images from Google Images, real search results
-- ✓ Without API key: Unsplash fallback images, mock search results
-
-### Test Image Display in Streamlit
-```bash
-# Run the Streamlit app
-streamlit run streamlit_app.py
-
-# Query: "Tell me about Paris"
-# Check: Images appear before text response
-```
-
-### Test Agent Directly
-```bash
-# Run CLI interface
-python main.py
-
-# Try queries:
-# - "Tell me about Tokyo"
-# - "What's the weather like?"
-# - "Show me Paris images"
-```
-
-### Run All Tests
-```bash
-# Run test suite (if available)
-pytest tests/
+```python
+def invoke_llm_with_retry(llm, prompt, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return llm.invoke(prompt)
+        except RateLimitError as e:
+            if e.type == "TPD":
+                switch_to_next_model()
+            else:
+                time.sleep(calculate_backoff(attempt))
 ```
 
 ---
-
-## 📊 Performance
-
-- **Vector Search**: < 100ms
-- **Weather API (Mock)**: 0.5-1.5s
-- **Image API (SerpAPI)**: 0.5-2.0s (or 0.3-1.0s fallback)
-- **Web Search (SerpAPI)**: 0.5-2.0s (or instant fallback)
-- **Parallel Execution**: ~1-2s total (vs ~3-4s sequential)
-- **LLM Response**: 1-3s (depends on Groq load)
-
-**Total Latency**: 
-- With SerpAPI: ~4-7 seconds from query to display
-- Fallback mode: ~3-5 seconds from query to display
-
----
-
-## 🐛 Troubleshooting
-
-### SerpAPI Not Working
-```bash
-# Verify API key is set
-cat .env | grep SERPAPI
-
-# Test SerpAPI directly
-python test_serpapi.py
-
-# Check console for error messages:
-# - "📸 SerpAPI: Retrieved X images" = Working
-# - "⚠️ SERPAPI_API_KEY not found" = Key missing
-# - "❌ SerpAPI error" = API issue (check quota/key)
-```
-
-### Images Not Displaying in Streamlit
-```bash
-# Check console for debug output
-# Should see: "[DEBUG] Image URLs: ['https://...']"
-
-# If using SerpAPI, verify rate limits
-# Free tier: 100 searches/month
-```
-
-### ChromaDB Issues
-```bash
-# Clear vector store and reinitialize
-rm -rf chroma_db/
-python -c "from vector_store import get_vector_store; get_vector_store()"
-```
-
-### API Key Errors
-```bash
-# Verify .env file exists and is loaded
-cat .env | grep GROQ_API_KEY
-cat .env | grep SERPAPI_API_KEY
-```
-
-### Dependency Conflicts
-```bash
-# Reinstall in fresh venv
-rm -rf venv/
-python3 -m venv venv
-source venv/bin/activate
-pip install -e .
-```
-
----
-
-## 🔒 Security Notes
-
-- Never commit `.env` file to version control
-- API keys should be stored securely
-- Use environment variables in production
-- Implement rate limiting for public deployments
-
----
-
-## 📚 References
-
-- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
-- [Groq API Docs](https://console.groq.com/docs)
-- [ChromaDB Guide](https://docs.trychroma.com/)
-- [Streamlit API Reference](https://docs.streamlit.io/)
-
----
-
-## 🤝 Contributing
-
-This is a technical challenge submission. For production use:
-1. Replace mock APIs with real integrations
-2. Add error handling and retry logic
-3. Implement proper logging
-4. Add unit and integration tests
-5. Set up CI/CD pipeline
-
----
-
-## 📄 License
-
-This project is created for educational purposes as part of an AI Engineering technical challenge.
-
----
-
-## 👨‍💻 Author
-
-**Senior AI Engineer Candidate**
-- Demonstrates: LangGraph orchestration, vector search, parallel execution, stateful memory
-- Tech Stack: Python 3.12, LangChain, Groq, ChromaDB, Streamlit, Plotly
-
----
-
-## 🌟 Distinctions Implemented
-
-✅ **Manual Tool Calling**: Custom parsing without `create_tool_calling_agent`  
-✅ **Parallel Fan-Out**: Concurrent weather + image fetching  
-✅ **Human-in-the-Loop**: Memory persistence with checkpointer  
-✅ **Structured Output**: JSON schema instead of raw Markdown  
-✅ **Intelligent Routing**: Conditional edges based on knowledge availability  
-✅ **Rich UI**: Interactive charts, galleries, and metrics
-
----
-
-**Built with ❤️ using LangGraph and Streamlit**
