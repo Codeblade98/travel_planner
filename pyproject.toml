@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Multi-Modal Travel Assistant with LangGraph and Streamlit"
 readme = "README.md"
 requires-python = ">=3.12"
+package_mode = false
 dependencies = [
     "langchain>=0.1.0",
     "langchain-groq>=0.1.0",
